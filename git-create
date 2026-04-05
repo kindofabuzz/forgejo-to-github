@@ -1,0 +1,106 @@
+#!/bin/bash
+
+#  Determine Repo Name
+REPO_NAME=${1:-$(basename "$PWD")}
+
+# --- CONFIG ---
+# Replace these with your actual values or export them in your .bashrc
+FORGEJO_URL="http://192.168.50.44:3000"
+FORGEJO_USER="***REMOVED***"
+GITHUB_USER="***REMOVED***"
+
+FORGEJO_TOKEN="${FORGEJO_TOKEN}"
+GITHUB_TOKEN="${GITHUB_TOKEN}"
+
+
+# Define colors
+red=$(tput setaf 1)
+green=$(tput setaf 2)
+cyan=$(tput setaf 6)
+reset=$(tput sgr0)
+
+if [[ -z "$FORGEJO_TOKEN" || -z "$GITHUB_TOKEN" ]]; then
+    echo "${red}Error: FORGEJO_TOKEN or GITHUB_TOKEN not found in environment.${reset}"
+    exit 1
+fi
+
+echo "${cyan}Targeting repository: '$REPO_NAME'${reset}"
+
+# --- Visibility Selection ---
+echo "${cyan}Should this repository be Private or Public? (p/P for Private, any other key for Public)${reset}"
+read -r -n 1 VISIBILITY_CHOICE
+echo ""
+
+if [[ "$VISIBILITY_CHOICE" == "p" || "$VISIBILITY_CHOICE" == "P" ]]; then
+    IS_PRIVATE="true"
+    echo "${cyan}Setting repository to PRIVATE...${reset}"
+else
+    IS_PRIVATE="false"
+    echo "${cyan}Setting repository to PUBLIC...${reset}"
+fi
+
+#  Creating repositories on GitHub and Forgejo
+echo "${cyan}1. Creating repository on GitHub...${reset}"
+curl -s -o /dev/null -X POST "https://api.github.com/user/repos" \
+     -H "Authorization: token $GITHUB_TOKEN" \
+     -H "Content-Type: application/json" \
+     -d "{\"name\":\"$REPO_NAME\", \"private\": $IS_PRIVATE}"
+
+echo "${cyan}2. Creating repository on Forgejo...${reset}"
+curl -s -o /dev/null -X POST "$FORGEJO_URL/api/v1/user/repos" \
+     -H "Authorization: token $FORGEJO_TOKEN" \
+     -H "Content-Type: application/json" \
+     -d "{\"name\":\"$REPO_NAME\", \"private\": $IS_PRIVATE}"
+
+#  Local Initialization
+if [ "$(basename "$PWD")" != "$REPO_NAME" ]; then
+    mkdir -p "$REPO_NAME" && cd "$REPO_NAME" || exit
+fi
+
+git init > /dev/null
+if [ ! -f README.md ]; then
+    echo "# $REPO_NAME" > README.md
+fi
+
+# --- Language Selection ---
+echo ""
+echo "${cyan}Select project type:${reset}"
+select PROJECT_TYPE in "Go" "Python" "Bash" "Exit"; do
+    case $PROJECT_TYPE in
+        "Go")
+            go mod init "$REPO_NAME"
+            echo 'package main; import "fmt"; func main() { fmt.Println("Hello") }' > main.go
+            break ;;
+        "Python")
+            if command -v uv &> /dev/null; then uv init; mv hello.py main.py 2>/dev/null; else touch main.py; fi
+            break ;;
+        "Bash")
+            echo "#!/bin/bash" > main.sh; chmod +x main.sh
+            break ;;
+        "Exit") exit 0 ;;
+    esac
+done
+
+#  Commit and Mirror Setup
+git add .
+git commit -m "Initial $PROJECT_TYPE commit" > /dev/null
+
+echo "${cyan}4. Setting up GitHub Push Mirror...${reset}"
+curl -s -o /dev/null -X POST "$FORGEJO_URL/api/v1/repos/$FORGEJO_USER/$REPO_NAME/push_mirrors" \
+     -H "Authorization: token $FORGEJO_TOKEN" \
+     -H "Content-Type: application/json" \
+     -d "{
+        \"remote_address\": \"git@github.com:$GITHUB_USER/$REPO_NAME.git\",
+        \"remote_username\": \"$GITHUB_USER\",
+        \"remote_password\": \"$GITHUB_TOKEN\",
+        \"interval\": \"8h0m0s\",
+        \"sync_on_commit\": true
+      }"
+
+# Final Push using the SSH Alias
+echo "${green}5. Pushing to Forgejo...${reset}"
+git remote remove origin 2>/dev/null
+git remote add origin "forgejo:$FORGEJO_USER/$REPO_NAME.git"
+git push -u origin main
+
+echo "${green}SUCCESS: $REPO_NAME is live and mirroring!${reset}"
