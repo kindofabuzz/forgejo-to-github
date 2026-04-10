@@ -6,8 +6,8 @@ REPO_NAME=${1:-$(basename "$PWD")}
 # --- CONFIG ---
 # Replace these with your actual values or export them in your .bashrc
 FORGEJO_URL="http://192.168.50.44:3000"
-FORGEJO_USER="***REMOVED***"
-GITHUB_USER="***REMOVED***"
+FORGEJO_USER="${FORGEJO_USER}"
+GITHUB_USER="${GITHUB_USER}"
 
 FORGEJO_TOKEN="${FORGEJO_TOKEN}"
 GITHUB_TOKEN="${GITHUB_TOKEN}"
@@ -69,7 +69,8 @@ select PROJECT_TYPE in "Go" "Python" "Bash" "Exit"; do
     case $PROJECT_TYPE in
         "Go")
             go mod init "$REPO_NAME"
-            echo 'package main; import "fmt"; func main() { fmt.Println("Hello") }' > main.go
+            # echo 'package main; import "fmt"; func main() { fmt.Println("Hello") }' > main.go
+            printf 'package main\n\nfunc main() {\n\n}\n' > main.go
             break ;;
         "Python")
             if command -v uv &> /dev/null; then uv init; mv hello.py main.py 2>/dev/null; else touch main.py; fi
@@ -84,6 +85,7 @@ done
 #  Commit and Mirror Setup
 git add .
 git commit -m "Initial $PROJECT_TYPE commit" > /dev/null
+git branch -M main
 
 echo "${cyan}4. Setting up GitHub Push Mirror...${reset}"
 curl -s -o /dev/null -X POST "$FORGEJO_URL/api/v1/repos/$FORGEJO_USER/$REPO_NAME/push_mirrors" \
