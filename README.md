@@ -42,8 +42,8 @@ Execute the `git-create` script to create and initialize repositories:
 The script guides you through the following steps interactively:
 1. **Visibility Selection**: Choose whether the repository is `Private` or `Public`.
 2. **Setup Language**:
-   - `Go`: Initializes a Go project.
-   - `Python`: Creates a Python project.
+   - `Go`: Initializes a Go project with `go mod init`.
+   - `Python`: Creates a Python project with `uv init`.
    - `Bash`: Sets up a Bash script template.
    - `Exit`: Cancels the process.
 
