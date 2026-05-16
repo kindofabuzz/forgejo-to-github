@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 #  Determine Repo Name
 REPO_NAME=${1:-$(basename "$PWD")}
