@@ -82,11 +82,12 @@ select PROJECT_TYPE in "Go" "Python" "Bash" "Exit"; do
     esac
 done
 
-#  Commit and Mirror Setup
-git add .
-git commit -m "Initial $PROJECT_TYPE commit" > /dev/null
-git branch -M main
+# Setup remote
+git branch -M main 2>/dev/null || true
+git remote remove origin 2>/dev/null
+git remote add origin "forgejo:$FORGEJO_USER/$REPO_NAME.git"
 
+# Setup GitHub push mirror
 echo "${cyan}4. Setting up GitHub Push Mirror...${reset}"
 curl -s -o /dev/null -X POST "$FORGEJO_URL/api/v1/repos/$FORGEJO_USER/$REPO_NAME/push_mirrors" \
      -H "Authorization: token $FORGEJO_TOKEN" \
@@ -99,10 +100,4 @@ curl -s -o /dev/null -X POST "$FORGEJO_URL/api/v1/repos/$FORGEJO_USER/$REPO_NAME
         \"sync_on_commit\": true
       }"
 
-# Final Push using the SSH Alias
-echo "${green}5. Pushing to Forgejo...${reset}"
-git remote remove origin 2>/dev/null
-git remote add origin "forgejo:$FORGEJO_USER/$REPO_NAME.git"
-git push -u origin main
-
-echo "${green}SUCCESS: $REPO_NAME is live and mirroring!${reset}"
+echo "${green}SUCCESS: $REPO_NAME created and mirror configured.${reset}"
