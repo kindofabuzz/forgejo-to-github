@@ -80,6 +80,8 @@ Automatically configures basic project templates:
 - **Python**: Sets up a Python script (`main.py`).
 - **Bash**: Prepares a Bash script (`main.sh`) with execution permissions.
 
+-  adds a .gitignore (mainly for go, python, and ides)
+
 ### Push Mirroring
 Automatically configures push mirroring:
 - Syncs changes from Forgejo to GitHub every 8 hours.
