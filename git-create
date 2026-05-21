@@ -62,6 +62,18 @@ if [ ! -f README.md ]; then
     echo "# $REPO_NAME" > README.md
 fi
 
+# Edit as needed
+if [ ! -f LICENSE ]; then
+    cat > LICENSE << EOF
+MIT License
+
+Copyright(c)2026 Spreadneck
+
+EOF
+   
+fi
+
+# Edit as needed
 if [ ! -f .gitignore ]; then
     cat > .gitignore << 'EOF'
 # Go
