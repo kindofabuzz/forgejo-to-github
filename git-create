@@ -108,12 +108,15 @@ fi
 # --- Language Selection ---
 echo ""
 echo "${cyan}Select project type:${reset}"
-select PROJECT_TYPE in "Go" "Python" "Bash" "Exit"; do
+select PROJECT_TYPE in "Go" "Odin" "Python" "Bash" "Exit"; do
     case $PROJECT_TYPE in
         "Go")
             go mod init "$REPO_NAME"
             # echo 'package main; import "fmt"; func main() { fmt.Println("Hello") }' > main.go
             printf 'package main\n\nfunc main() {\n\n}\n' > main.go
+            break ;;
+        "Odin")
+            printf 'package %s\n\n' "$REPO_NAME" > "$REPO_NAME".odin
             break ;;
         "Python")
             if command -v uv &> /dev/null; then uv init; mv hello.py main.py 2>/dev/null; else touch main.py; fi
