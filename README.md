@@ -76,7 +76,9 @@ The script creates repositories on:
 
 ### Language Initialization
 Automatically configures basic project templates:
+- **C**: Sets up a basic main.c
 - **Go**: Initializes `go.mod` and main function.
+- **Odin**: Crates a basic <foldername>.odin with package <foldername>
 - **Python**: Sets up a Python script (`main.py`).
 - **Bash**: Prepares a Bash script (`main.sh`) with execution permissions.
 
