@@ -108,11 +108,8 @@ fi
 # --- Language Selection ---
 echo ""
 echo "${cyan}Select project type:${reset}"
-<<<<<<< HEAD
-select PROJECT_TYPE in "C" "Go" "Python" "Bash" "Exit"; do
-=======
-select PROJECT_TYPE in "Go" "Odin" "Python" "Bash" "Exit"; do
->>>>>>> 465dde888e7cc5d1aed3d16e1c04bb3969770bae
+
+select PROJECT_TYPE in "C" "Go" "Odin" "Python" "Bash" "Exit"; do
     case $PROJECT_TYPE in
         "C")
             printf '#include <stdio.h>\n\nint main() {\n\n}' >> main.c
