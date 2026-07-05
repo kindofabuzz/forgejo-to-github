@@ -108,8 +108,11 @@ fi
 # --- Language Selection ---
 echo ""
 echo "${cyan}Select project type:${reset}"
-select PROJECT_TYPE in "Go" "Python" "Bash" "Exit"; do
+select PROJECT_TYPE in "C" "Go" "Python" "Bash" "Exit"; do
     case $PROJECT_TYPE in
+        "C")
+            printf '#include <stdio.h>\n\nint main() {\n\n}' >> main.c
+            break ;;
         "Go")
             go mod init "$REPO_NAME"
             # echo 'package main; import "fmt"; func main() { fmt.Println("Hello") }' > main.go
