@@ -43,8 +43,10 @@ The script guides you through the following steps interactively:
 1. **Visibility Selection**: Choose whether the repository is `Private` or `Public`.
 2. **Setup Language**:
    - `Go`: Initializes a Go project with `go mod init`.
+   - `C`: Just adds a `main.c`
    - `Python`: Creates a Python project with `uv init`.
    - `Bash`: Sets up a Bash script template.
+   - `Rust`: does a `cargo init`
    - `Exit`: Cancels the process.
 
 3. **Mirroring**:
