@@ -105,7 +105,9 @@ select PROJECT_TYPE in "C" "Go" "Odin" "Python" "Rust" "Bash" "Exit"; do
         ;;
     "Rust")
         if command -v cargo &>/dev/null; then
-            cargo init --name "${REPO_NAME//-/_}" --vcs none
+            if ! cargo init --name "${REPO_NAME//-/_}" --vcs none; then
+                echo "${red}cargo init failed (likely an existing Cargo.toml) — leaving Rust files untouched.${reset}"
+            fi
         else
             printf 'fn main() {\n\n}\n' >main.rs
         fi
@@ -153,16 +155,16 @@ fi
 
 #  Creating repositories on GitHub and Forgejo
 echo "${cyan}1. Creating repository on GitHub...${reset}"
-curl -s -o /dev/null -X POST "https://api.github.com/user/repos" \
+curl -s -X POST "https://api.github.com/user/repos" \
     -H "Authorization: token $GITHUB_TOKEN" \
     -H "Content-Type: application/json" \
     -d "{\"name\":\"$REPO_NAME\", \"private\": $IS_PRIVATE}"
 
 echo "${cyan}2. Creating repository on Forgejo...${reset}"
-curl -s -o /dev/null -X POST "$FORGEJO_URL/api/v1/user/repos" \
+curl -s -X POST "$FORGEJO_URL/api/v1/user/repos" \
     -H "Authorization: token $FORGEJO_TOKEN" \
     -H "Content-Type: application/json" \
-    -d "{\"name\":\"$REPO_NAME\", \"private\": $IS_PRIVATE}"
+    -d "{\"name\":\"$REPO_NAME\", \"private\": $IS_PRIVATE, \"default_branch\": \"main\"}"
 
 # Setup remote
 git remote remove origin 2>/dev/null
